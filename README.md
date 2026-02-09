@@ -1,0 +1,2 @@
+Author: Jonathan Danilov
+Description: This program takes an amazon link or links from the user and outputs the price, then the user will select a notification method and once there is a change of price of the product, the user will get notified via their desired method.
