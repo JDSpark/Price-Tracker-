@@ -45,29 +45,29 @@ def get_price_from_url(url):
 def save_dict_to_csv(dict, filename="urls.csv"): 
     with open(filename, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["item", "url", "name", "price"])
-        for item, url in dict.items():
-            writer.writerow([item, url, get_name_from_url(url), get_price_from_url(url)])
+        writer.writerow(["Item", "Name", "Price", "URL"])
+        for item, product in dict.items():
+            writer.writerow([product.id, product.name, product.price, product.url])
 
 #check to see if product already inside of CSV, if not gets added USING URL
-def check_item_in_csv(dict, key_to_check, filename="urls.csv"): 
+def check_item_in_csv(product, filename="urls.csv"): 
         with open(filename, mode='r', newline='', encoding="utf-8") as f:
             reader = csv.DictReader(f)
-            value_to_find = dict[key_to_check]
+            key_to_check = product.id
 
             found = False
             for row in reader:
-                if row.get('url') == value_to_find:
+                if row.get('Item') == key_to_check:
                     found = True
                     break
             if found:
-                 print(f"Item {key_to_check[-1]} Already Exists") #Testing Purposes
+                 print(f"{product.name} is Already Being Tracked.") #Testing Purposes
                  return True
             else:
                  return False
 
 #Add Product to CSV 
-def add_to_csv(item, url, filename="urls.csv"):
+def add_to_csv(url, item='', filename="urls.csv"):
     item = get_next_item_number()
     with open(filename, mode='a', newline='') as f:
         writer = csv.writer(f)
@@ -81,8 +81,8 @@ def get_next_item_number(filename="urls.csv"):
         with open(filename, mode="r", newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                item = (row.get("item") or "").strip()
-                num_set.add(int(item))
+                item = (row.get("Item") or "").strip()
+                num_set.add(item)
             while max_num in num_set:
                 max_num += 1
     except FileNotFoundError:
@@ -134,3 +134,4 @@ def print_item_name(filename="urls.csv"):
 def delete_row(item,filename="urls.csv"):
     with open(filename, mode='w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
+

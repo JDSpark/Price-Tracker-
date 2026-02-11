@@ -4,7 +4,7 @@ class Product:
         self.id = id
         self.url = url 
         self.name = get_name_from_url(url)
-        self.price = "test"   
+        self.price = "Test Price"
     # name = get_name_from_url(url)
     # current_price = get_price_from_url(url)
     # last_price = "last_price"

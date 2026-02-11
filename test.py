@@ -21,8 +21,8 @@ for item_num, url in url_dict.items():
     # item number = first item in dict
     # url = second item in dict 
 
-for item_num, product_by_id in products_by_id_num.items():
-    print(f"Item {item_num}")
-item2 = products_by_id_num["2"]
-print(item2.name)
+#prints id number for all products inside the products_by_id_num dict
+for item_num, product in products_by_id_num.items():
+    print(products_by_id_num[item_num].id)
 
+item2 = products_by_id_num['2']
