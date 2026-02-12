@@ -57,11 +57,12 @@ def check_item_in_csv(product, filename="urls.csv"):
 
             found = False
             for row in reader:
-                if row.get('Item') == key_to_check:
+                item_url = row.get("URL")
+                if item_url == product.url:
                     found = True
                     break
             if found:
-                 print(f"{product.name} is Already Being Tracked.") #Testing Purposes
+                 print(f"{product.name} is Already Being Tracked.")
                  return True
             else:
                  return False
@@ -71,7 +72,7 @@ def add_to_csv(url, item='', filename="urls.csv"):
     item = get_next_item_number()
     with open(filename, mode='a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([item, url, get_name_from_url(url), get_price_from_url(url)])
+        writer.writerow([item, get_name_from_url(url), get_price_from_url(url), url])
         
 #Get the next item number based on how many items already in CSV 
 def get_next_item_number(filename="urls.csv"): 
@@ -82,12 +83,12 @@ def get_next_item_number(filename="urls.csv"):
             reader = csv.DictReader(f)
             for row in reader:
                 item = (row.get("Item") or "").strip()
-                num_set.add(item)
+                num_set.add(int(item))
             while max_num in num_set:
                 max_num += 1
     except FileNotFoundError:
         pass
-    return max_num
+    return str(max_num)
 
 #Using the URL prints all the information about the product that is stored inside the csv 
 def print_product_info(url, filename="urls.csv"):
@@ -97,14 +98,14 @@ def print_product_info(url, filename="urls.csv"):
              if row.get("url") == url:
                 item_num = row.get("item")
                 parts = item_num.split()
-                print(f"Item: {row.get("item")}; Name: {row.get("name")}; Price: {row.get("price")}")
+                print(f"Item: {row.get('item')}; Name: {row.get('name')}; Price: {row.get('price')}")
 
 #Print the item #, name, and price of all the products inside the csv
 def print_all_in_csv(filename="urls.csv"):
     with open(filename, mode='r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            print(f"Item {row["item"]}; Name: {row["name"]}; Price: {row["price"]}")
+            print(f"Item {row['item']}; Name: {row['name']}; Price: {row['price']}")
 
 #Adds values from a column in the csv into a set
 def import_into_set(set,row_to_check,filename="urls.csv"):
@@ -128,7 +129,7 @@ def print_item_name(filename="urls.csv"):
     with open(filename, mode='r', newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            print(f"Item {row["item"]}; Name: {row["name"]}")
+            print(f"Item {row['Item']}; Name: {row['Name']}")
 
 #Delete a row based on the item #
 def delete_row(item,filename="urls.csv"):

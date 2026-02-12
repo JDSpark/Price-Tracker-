@@ -24,11 +24,12 @@ elif choice.strip() == "2":
     url = input("Enter URL (press Enter on blank line to finish): ")
     while url != "":
         url_dict[f"{str(c)}"] = url
+        c = int(c)
         c+=1
         url = input("Enter URL (press Enter on blank line to finish): ")
     for item_num, url in url_dict.items():
         product_by_id[item_num] = Product(item_num, url)
-    for item, product in product_by_id.items(): 
-        check_item_in_csv(product)
-        if check_item_in_csv == False:
+    for item, product in product_by_id.items():
+        found = check_item_in_csv(product)
+        if found == False:
             add_to_csv(product.url)
