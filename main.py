@@ -1,12 +1,16 @@
 from urllib.parse import urlparse
 from pathlib import Path
-from functions import check_item_in_csv, get_next_item_number, add_to_csv, print_all_in_csv, store_csv_in_dict, print_item_name, import_into_set, print_product_info
+from functions import check_item_in_csv, get_next_item_number, add_to_csv, print_all_in_csv, load_csv_to_dict, print_item_name, import_into_set, print_product_info, run_updates
 from product import Product
 MEMBERS = {"1","2","3","4"}
 c = get_next_item_number()
 url_dict = {}
 product_by_id = {}
-store_csv_in_dict(product_by_id)
+load_csv_to_dict(product_by_id)
+#all items inside CSV has been loaded into product_by_id dict
+run_updates(product_by_id)
+
+
 choice = input(
      "What would you like to do: "
      "\n1) View All Products"
@@ -48,7 +52,8 @@ elif choice.strip() == "3":
         found = check_item_in_csv(product)
         if found == False:
             add_to_csv(product.url)
+    print("All Products Added Successfully!")
 
-#
+#Delete a Product inside the CSV 
 elif choice.strip() == "4":
-    print("4")
+    print("NOT SETUP YET")
