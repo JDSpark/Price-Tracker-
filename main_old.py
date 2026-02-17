@@ -25,6 +25,7 @@ while choice.strip() not in MEMBERS:
 if choice.strip() == "1":
     for item_num, url in url_dict.items():
         product_by_id[item_num] = Product(item_num, url)
+    
 
 #Choice 2: View a Specific item
 elif choice.strip() == "2":
@@ -79,3 +80,18 @@ elif choice.strip() == "4":
 
 
 
+# elif choice.strip() == "3":
+#     members2 = set[int]()
+#     import_into_set(product_by_id, members2)
+#     c = get_next_item_number()
+#     url = input("Enter URL (press Enter on blank line to finish): ")
+#     while url != "":
+#         product = Product(c, url, get_name_from_url(url), get_price_from_url(url))
+#         found = check_item_in_csv(product)
+#         if not found:
+#             while c in members2:
+#                 c = get_next_item_number()
+#             product_by_id[f"{c}"] = product
+#             members2.add(c)
+#             save_dict_to_csv(product_by_id)
+#         url = input("Enter URL (press Enter on blank line to finish): ")

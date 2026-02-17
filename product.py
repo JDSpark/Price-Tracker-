@@ -2,7 +2,7 @@ from scraper import get_name_from_url, get_price_from_url, get_price_from_csv
 from typing import Optional
 
 class Product:
-    def __init__(self, id:str, url:str, name:str , current_price:str, last_price:Optional[str] = None):
+    def __init__(self, id:int, url:str, name:str , current_price:str, last_price:Optional[str] = None):
         self.id = id
         self.url = url 
         self.name = name

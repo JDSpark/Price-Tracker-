@@ -39,26 +39,20 @@ def check_item_in_csv(product, filename="urls.csv"):
 
 #Add Product to CSV 
 def add_to_csv(url, item='', filename="urls.csv"):
+    product = set_product_info(url)
     item = get_next_item_number()
     with open(filename, mode='a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([item, get_name_from_url(url), get_price_from_url(url), url])
+        writer.writerow([product.id, product.name, product.current_price, product.last_price, product.url])
         
 #Get the next item number based on how many items already in CSV 
-def get_next_item_number(filename="urls.csv"): 
+def get_next_item_number(dict, filename="urls.csv"): 
     max_num = 1
-    num_set = set()
-    try:
-        with open(filename, mode="r", newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                item = (row.get("Item") or "").strip()
-                num_set.add(int(item))
-            while max_num in num_set:
-                max_num += 1
-    except FileNotFoundError:
-        pass
-    return str(max_num)
+    num_set = set[int]()
+    import_into_set(dict, num_set)
+    while max_num in num_set:
+        max_num+=1
+    return max_num
 
 #Print the item #, name, and price of all the products inside the csv
 def print_all_in_csv(dict):
@@ -66,8 +60,7 @@ def print_all_in_csv(dict):
         product = dict[item_num]
         print(f"Item {product.id}; Name: {product.name}; Current Price: {product.current_price}; Previous Price: {product.last_price}")
 
-
-#Adds values from a dict into a set
+#Adds id values from a dict into a set
 def import_into_set(dict, set):
     for item_num, product in dict.items():
         product = dict[item_num]
@@ -122,3 +115,21 @@ def check_for_new_price(dict):
 def run_updates(dict):
     check_for_new_price(dict)
     save_dict_to_csv(dict)
+
+#Sets the product information using the URL
+def set_product_info(url, dict):
+    name = get_name_from_url(url)
+    id = get_next_item_number(dict)
+    current_price = get_price_from_url(url)
+    product = Product(id, url, name, current_price)
+    return product
+    
+#check to see if product already inside of a dict, if not gets added 
+def check_item_in_dict(item_to_check, dict, filename="urls.csv"): 
+        for item_num, product in dict.items():
+            url = product.url
+            if item_to_check == url:
+                print(f"Item {product.name} is Already being Tracked")
+                return True
+            else:
+                return False
