@@ -41,10 +41,12 @@ def get_price_from_url(url):
         print(f"An unexpected error occurred: {e}")
         return None
 
-#Gets the price of a product using the URL that is already inside the CSV 
-def get_price_from_csv(url, filename="urls.csv"):
-    with open(filename, mode='r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if row.get("URL") == url:
-                return row.get("Price")
+def get_website(url):
+    parsed_url = urlparse(url)
+    website_name = parsed_url.netloc
+    #Check for Bestbuy
+    if website_name == "www.bestbuy.com":
+        return "Best Buy"
+    #Check For Amazon
+    elif website_name == "www.amazon.com":
+        return "Amazon"
