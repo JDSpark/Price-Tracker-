@@ -3,12 +3,13 @@ from typing import Any
 
 from urllib.parse import urlparse
 from pathlib import Path
-from functions import check_item_in_csv, get_next_item_number, add_to_csv, print_all_in_csv, load_csv_to_dict, print_item_name, import_into_set, print_product_info, run_updates, save_dict_to_csv, set_product_info, check_item_in_dict
+from functions import get_next_item_number, print_all_in_csv, load_csv_to_dict, print_item_name, import_into_set, print_product_info, run_updates, save_dict_to_csv, set_product_info, check_item_in_dict
 from product import Product
 from scraper import get_name_from_url, get_price_from_url
 MEMBERS = {"1","2","3","4"}
 url_dict = {}
 product_by_id = load_csv_to_dict()
+run_updates(product_by_id)
 c = get_next_item_number(product_by_id)
 #all items inside CSV has been loaded into product_by_id dict
 
@@ -29,18 +30,18 @@ if choice.strip() == "1":
         run_updates(product_by_id)
         print_all_in_csv(product_by_id)
 
-#View a Specific Item
+#View a Specific Item - COMPLETED
 elif choice.strip() == "2":
-    members2 = set()
+    members2 = set[int]()
     import_into_set(product_by_id, members2)
     print_item_name(product_by_id)
     choice2 = int(input("Enter the Item Number for the Product You Would Like to View: "))
-    while choice2.strip() not in members2:
-        choice2 = input("Enter Valid Choice: ")
-    item_num = choice2.strip()
+    while choice2 not in members2:
+        choice2 = int(input("Enter Valid Choice: "))
+    item_num = choice2
     print_product_info(product_by_id, item_num)
      
-#Add product information into CSV
+#Add product information into CSV - COMPLETED
 elif choice.strip() == "3":
     members2 = set[int]()
     import_into_set(product_by_id, members2)

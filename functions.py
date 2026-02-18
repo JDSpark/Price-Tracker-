@@ -88,6 +88,7 @@ def load_csv_to_dict(filename = "urls.csv"):
         reader = csv.DictReader(f)
         for row in reader:
             item_num = row.get("Item")
+            item_num = int(item_num)
             url = row.get("URL")
             name = row.get("Name")
             current_price = row.get("Current Price")
@@ -107,9 +108,9 @@ def check_for_new_price(dict):
         current_price = product.current_price
         last_price = product.last_price 
         if current_price != last_price:
+            print(f"{product.name} Had a Price Change from {product.last_price} to {product.current_price}.")
             product.last_price = current_price
             product.current_price = get_price_from_url(product.url)
-            print(f"{product.name} Had a Price Change from {product.last_price} to {product.current_price}.")
 
 #runs checks and updates CSV 
 def run_updates(dict):
@@ -131,5 +132,4 @@ def check_item_in_dict(item_to_check, dict, filename="urls.csv"):
             if item_to_check == url:
                 print(f"Item {product.name} is Already being Tracked")
                 return True
-            else:
-                return False
+        return False
