@@ -1,3 +1,4 @@
+from math import prod
 from typing import Any
 
 
@@ -57,8 +58,14 @@ elif choice.strip() == "3":
     
 #Delete a Product inside the CSV 
 elif choice.strip() == "4":
-    print_all_in_csv(product_by_id)
-    print("NOT SETUP YET")
-
+    members2 = set[int]()
+    import_into_set(product_by_id, members2)
+    print_item_name(product_by_id)
+    choice2 = int(input("Enter the Item Number for the Product You Would Like to Delete: "))
+    while choice2 not in members2:
+        choice2 = int(input("Enter Valid Choice: "))
+    item_num = choice2
+    del product_by_id[item_num]
+    print_item_name(product_by_id)
 
 save_dict_to_csv(product_by_id)
