@@ -1,0 +1,69 @@
+<!-- app/templates/layout.html -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Pricer Tracker{% endblock %}</title>
+
+    <!-- main.css should be in app/static/main.css -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+  </head>
+
+  <body>
+    <!-- NAV -->
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="{{ url_for('home_page') }}">
+          <span class="brand-badge" aria-hidden="true"></span>
+          <span>Pricer Tracker</span>
+        </a>
+
+        <nav class="row row-wrap">
+          <a class="btn btn-ghost" href="{{ url_for('home_page') }}">Home</a>
+          <a class="btn btn-ghost" href="{{ url_for('about') }}">About</a>
+          {% block nav_extra %}{% endblock %}
+        </nav>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="container">
+      {% if page_title %}
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header">
+            <h1 class="card-title" style="font-size:22px; margin:0;">{{ page_title }}</h1>
+            {% block header_actions %}{% endblock %}
+          </div>
+
+          {% if page_subtitle %}
+            <p style="margin:0; color: var(--muted);">{{ page_subtitle }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="grid" style="margin-bottom:16px;">
+            {% for category, message in messages %}
+              <div class="alert {{ 'alert-info' if category in ['info','message','success'] else '' }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="container footer">
+  <div class="row row-wrap" style="justify-content: space-between;">
+    <span>© Pricer Tracker</span>
+    <span style="color: var(--muted);">Charcoal + Electric Blue</span>
+  </div>
+</footer>
+
+
