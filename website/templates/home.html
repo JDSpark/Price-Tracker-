@@ -1,8 +1,64 @@
 {% extends "layout.html" %}
 {% block content %}
-    {% for post in posts %}
-        <h1>{{ post.title }}</h1>
-        <p>By {{ post.author }} on {{ post.date_posted }}</p>
-        <p>{{ post.content }}</p>
-    {% endfor %}
-{% endblock content %}
+
+<!-- Add Product Form -->
+<div class="card" style="margin-bottom: 20px;">
+  <div class="card-header">
+    <h2 class="card-title">Track a New Product</h2>
+  </div>
+  <form method="POST" action="/add" class="row row-wrap">
+    <input type="url" name="url" placeholder="Paste an Amazon product URL..." required
+           style="flex: 1; min-width: 260px;">
+    <button type="submit" class="btn btn-primary">Add Product</button>
+  </form>
+</div>
+
+<!-- Product Table -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Tracked Products</h2>
+  </div>
+
+  {% if products %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Product</th>
+        <th>Current Price</th>
+        <th>Last Price</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for id, p in products.items() %}
+      <tr>
+        <td>{{ id }}</td>
+        <td><a href="{{ p.url }}" target="_blank">{{ p.name }}</a></td>
+        <td>{{ p.current_price }}</td>
+        <td>{{ p.last_price }}</td>
+        <td>
+          {% if p.current_price < p.last_price %}
+            <span class="pill" style="border-color:rgba(34,197,94,0.45); background:rgba(34,197,94,0.12); color:#bbf7d0;">↓ Dropped</span>
+          {% elif p.current_price > p.last_price %}
+            <span class="pill" style="border-color:rgba(239,68,68,0.45); background:rgba(239,68,68,0.12); color:#fecaca;">↑ Increased</span>
+          {% else %}
+            <span class="pill">— No Change</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="POST" action="/delete/{{ id }}">
+            <button type="submit" class="btn btn-ghost" style="color:#f87171; border-color:rgba(239,68,68,0.3);">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p style="color: var(--muted);">No products tracked yet. Add one above.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

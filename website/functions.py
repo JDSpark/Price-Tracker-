@@ -1,0 +1,105 @@
+import csv
+from product import Product
+from scraper import get_name_from_url, get_price_from_url
+
+# -------------------------------------------------------
+# CSV — Save
+# -------------------------------------------------------
+
+def save_dict_to_csv(dict, filename="urls.csv"):
+    with open(filename, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Item", "Name", "Current Price", "Last Price", "URL"])
+        for item_num, product in dict.items():
+            if product.last_price == "" or product.last_price is None:
+                product.last_price = product.current_price
+            writer.writerow([product.id, product.name, product.current_price, product.last_price, product.url])
+
+# -------------------------------------------------------
+# CSV — Load
+# -------------------------------------------------------
+
+def load_csv_to_dict(filename="urls.csv"):
+    products_by_id = {}
+    with open(filename, mode='r', newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            item_num = int(row.get("Item"))
+            url = row.get("URL")
+            name = row.get("Name")
+            current_price = row.get("Current Price")
+            last_price = row.get("Last Price")
+            products_by_id[item_num] = Product(item_num, url, name, current_price, last_price)
+    return products_by_id
+
+# -------------------------------------------------------
+# ID Management
+# -------------------------------------------------------
+
+def get_next_item_number(dict):
+    num_set = set()
+    import_into_set(dict, num_set)
+    max_num = 1
+    while max_num in num_set:
+        max_num += 1
+    return max_num
+
+def import_into_set(dict, set):
+    for item_num, product in dict.items():
+        set.add(product.id)
+
+# -------------------------------------------------------
+# Product Info
+# -------------------------------------------------------
+
+def set_product_info(url, dict):
+    name = get_name_from_url(url)
+    id = get_next_item_number(dict)
+    current_price = get_price_from_url(url)
+    product = Product(id, url, name, current_price)
+    return product
+
+def check_item_in_dict(item_to_check, dict):
+    for item_num, product in dict.items():
+        if item_to_check == product.url:
+            return True
+    return False
+
+# -------------------------------------------------------
+# Price Updates
+# -------------------------------------------------------
+
+def check_for_price_updates(dict):
+    changes = []
+    for item_num, product in dict.items():
+        new_price = get_price_from_url(product.url)
+        changed = product.apply_new_price(new_price)
+        if changed:
+            changes.append({
+                "name": product.name,
+                "old_price": product.last_price,
+                "new_price": product.current_price
+            })
+            print(f"{product.name}: {product.last_price} → {product.current_price}")
+    return changes
+
+def run_updates(dict):
+    changes = check_for_price_updates(dict)
+    save_dict_to_csv(dict)
+    return changes
+
+# -------------------------------------------------------
+# CLI helpers (used by main.py only)
+# -------------------------------------------------------
+
+def print_all_in_csv(dict):
+    for item_num, product in dict.items():
+        print(f"Item {product.id}; Name: {product.name}; Current Price: {product.current_price}; Previous Price: {product.last_price}")
+
+def print_item_name(dict):
+    for item_num, product in dict.items():
+        print(f"Item: {product.id}; Name: {product.name}")
+
+def print_product_info(dict, item_num):
+    product = dict[item_num]
+    print(f"Name: {product.name}; Price: {product.current_price}")
