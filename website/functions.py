@@ -1,6 +1,7 @@
 import csv
 from product import Product
 from scraper import get_name_from_url, get_price_from_url
+from alerts import send_price_alert
 
 # -------------------------------------------------------
 # CSV — Save
@@ -72,13 +73,15 @@ def check_item_in_dict(item_to_check, dict):
 def check_for_price_updates(dict):
     changes = []
     for item_num, product in dict.items():
+        old_price = product.current_price
         new_price = get_price_from_url(product.url)
         changed = product.apply_new_price(new_price)
         if changed:
             changes.append({
                 "name": product.name,
-                "old_price": product.last_price,
-                "new_price": product.current_price
+                "old_price": old_price,
+                "new_price": product.current_price,
+                "url" : product.url
             })
             print(f"{product.name}: {product.last_price} → {product.current_price}")
     return changes
@@ -86,6 +89,8 @@ def check_for_price_updates(dict):
 def run_updates(dict):
     changes = check_for_price_updates(dict)
     save_dict_to_csv(dict)
+    for change in changes:
+        send_price_alert(change["name"], change["old_price"], change["new_price"], change["url"])
     return changes
 
 # -------------------------------------------------------

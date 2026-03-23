@@ -87,7 +87,7 @@ def get_price_amazon(url):
     price = soup.select_one('#corePrice_feature_div span.a-offscreen')
     if price:
         return price.get_text().strip()
-    print("Amazon: price element not found")
+    print(f"Amazon: price element not found for {url}")
     return None
 
 def get_name_amazon(url):
