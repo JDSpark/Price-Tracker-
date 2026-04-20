@@ -1,8 +1,9 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from functions import (load_csv_to_dict, save_dict_to_csv, set_product_info,
                        get_next_item_number, check_item_in_dict, run_updates)
 from scraper import get_website
-import os
+from scheduler import start_scheduler
 from dotenv import load_dotenv 
 load_dotenv()
 
@@ -16,8 +17,8 @@ def get_products():
 
 @app.route("/")
 def home_page():
+    run_updates()
     products = get_products()
-    run_updates(products)
     products = dict(sorted(products.items(), key=lambda x: int(x[0])))
     return render_template("home.html", products=products)
 
@@ -53,5 +54,6 @@ def delete_product(item_id):
         flash("Product removed.", "info")
     return redirect(url_for("home_page"))
 
+start_scheduler()
 if __name__ == "__main__":
     app.run(debug=True)

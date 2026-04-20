@@ -1,7 +1,36 @@
 import csv
+import time
 from product import Product
 from scraper import get_name_from_url, get_price_from_url
 from alerts import send_price_alert
+
+# -------------------------------------------------------
+# Price Updates
+# -------------------------------------------------------
+
+def fix_url(url):
+    if "/dp/" not in url:
+        return None
+    start = url.find("/dp/") + len("/dp/")
+    slash = url.find("/", start)
+    question_mark = url.find("?", start)
+    #if -1 is outputed, it means there was no character found in the string
+    if question_mark == -1 and slash == -1:
+        end = len(url)
+    elif question_mark == -1:
+        end = slash
+    elif slash == -1:
+        end = question_mark
+    elif question_mark != -1 and slash != -1:
+        if question_mark < slash:
+            end = question_mark
+        else:
+            end = slash
+    dp = url[start:end]
+    if len(dp) != 10:
+        return None
+    clean_url = "https://www.amazon.com/dp/" + dp
+    return clean_url
 
 # -------------------------------------------------------
 # CSV — Save
@@ -75,6 +104,7 @@ def check_for_price_updates(dict):
     for item_num, product in dict.items():
         old_price = product.current_price
         new_price = get_price_from_url(product.url)
+        time.sleep(2)
         changed = product.apply_new_price(new_price)
         if changed:
             changes.append({
@@ -86,7 +116,8 @@ def check_for_price_updates(dict):
             print(f"{product.name}: {product.last_price} → {product.current_price}")
     return changes
 
-def run_updates(dict):
+def run_updates():
+    dict = load_csv_to_dict()
     changes = check_for_price_updates(dict)
     save_dict_to_csv(dict)
     for change in changes:

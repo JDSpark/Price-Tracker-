@@ -4,6 +4,9 @@ import os
 from urllib.parse import urlparse
 from pathlib import Path
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv 
+load_dotenv()
+SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY")
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
@@ -66,7 +69,7 @@ def get_name_from_url(url):
 
 def fetch_page(url):
     try:
-        response = requests.get(url, headers=HEADERS, timeout=10)
+        response = requests.get(f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={url}", headers=HEADERS, timeout=60)
         response.raise_for_status()
         return BeautifulSoup(response.content, "html.parser")
     except requests.exceptions.RequestException as e:
@@ -80,24 +83,15 @@ def fetch_page(url):
 # Amazon
 # -------------------------------------------------------
 
-def get_price_amazon(url):
+def get_product_info_amazon(url):
     soup = fetch_page(url)
     if not soup:
         return None
     price = soup.select_one('#corePrice_feature_div span.a-offscreen')
-    if price:
-        return price.get_text().strip()
-    print(f"Amazon: price element not found for {url}")
-    return None
-
-def get_name_amazon(url):
-    soup = fetch_page(url)
-    if not soup:
-        return get_name_from_path(url)
     title = soup.find("span", {"id": "productTitle"})
-    if title:
-        return title.get_text(strip=True)
-    return get_name_from_path(url)
+    name = title.get_text(strip=True) if title else get_name_from_path(url)
+    price_text = price.get_text().strip() if price else None
+    return name, price_text 
 
 # -------------------------------------------------------
 # Best Buy (placeholder — add selector when ready)
