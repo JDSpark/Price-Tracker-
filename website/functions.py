@@ -1,7 +1,7 @@
 import sqlite3
 import time
 from product import Product
-from scraper import get_product_info_amazon
+from scraper import get_name_from_url, get_price_from_url, get_product_info_amazon
 from alerts import send_price_alert
 from website.db import get_connection
 
@@ -31,7 +31,7 @@ def fix_url(url):
     return clean_url
 
 # -------------------------------------------------------
-# CSV — Load
+# Database Management
 # -------------------------------------------------------
 
 def load_db_to_dict():
@@ -46,6 +46,25 @@ def load_db_to_dict():
     conn.close()
     return product_dict
 
+def add_product(url):
+    name, price = get_product_info_amazon(url)
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO products (name, current_price, last_price, url) VALUES (?,?,?,?) ", (name, price, price, url))
+    conn.commit()
+    new_id = cur.lastrowid
+    product = Product(new_id, url, name, price, price)
+    conn.close()
+    return product
+
+def delete_product(product_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM products WHERE id = ?", (product_id,))
+    conn.commit()
+    conn.close()
+
+
 # -------------------------------------------------------
 # ID Management
 # -------------------------------------------------------
@@ -57,12 +76,6 @@ def import_into_set(dict, set):
 # -------------------------------------------------------
 # Product Info
 # -------------------------------------------------------
-
-def set_product_info(url, dict):
-    name, current_price = get_product_info_amazon(url)
-    id = get_next_item_number(dict)
-    product = Product(id, url, name, current_price)
-    return product
 
 def check_item_in_dict(item_to_check, dict):
     for item_num, product in dict.items():
