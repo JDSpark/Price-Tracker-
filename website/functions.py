@@ -64,7 +64,14 @@ def delete_product(product_id):
     conn.commit()
     conn.close()
 
-
+def url_already_tracked(url):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM products WHERE url = ?", (url,))
+    check = cur.fetchone()
+    conn.close()
+    return check is not None
+    
 # -------------------------------------------------------
 # ID Management
 # -------------------------------------------------------
