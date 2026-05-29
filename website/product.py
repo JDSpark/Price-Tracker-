@@ -1,4 +1,3 @@
-from scraper import get_name_from_url, get_price_from_url, get_price_from_csv
 from typing import Optional
 
 class Product:

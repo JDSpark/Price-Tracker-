@@ -1,8 +1,9 @@
-import csv
+import sqlite3
 import time
 from product import Product
 from scraper import get_product_info_amazon
 from alerts import send_price_alert
+from website.db import get_connection
 
 # -------------------------------------------------------
 # URL Cleaner
@@ -30,46 +31,24 @@ def fix_url(url):
     return clean_url
 
 # -------------------------------------------------------
-# CSV — Save
-# -------------------------------------------------------
-
-def save_dict_to_csv(dict, filename="urls.csv"):
-    with open(filename, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["Item", "Name", "Current Price", "Last Price", "URL"])
-        for item_num, product in dict.items():
-            if product.last_price == "" or product.last_price is None:
-                product.last_price = product.current_price
-            writer.writerow([product.id, product.name, product.current_price, product.last_price, product.url])
-
-# -------------------------------------------------------
 # CSV — Load
 # -------------------------------------------------------
 
-def load_csv_to_dict(filename="urls.csv"):
-    products_by_id = {}
-    with open(filename, mode='r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            item_num = int(row.get("Item"))
-            url = row.get("URL")
-            name = row.get("Name")
-            current_price = row.get("Current Price")
-            last_price = row.get("Last Price")
-            products_by_id[item_num] = Product(item_num, url, name, current_price, last_price)
-    return products_by_id
+def load_db_to_dict():
+    product_dict = {}
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(""" SELECT * FROM products """)
+    rows = cur.fetchall()
+    for row in rows:
+        product = Product(id=row[0],url=row[4],name=row[1], current_price=row[2],last_price=row[3])
+        product_dict[product.id] = product
+    conn.close()
+    return product_dict
 
 # -------------------------------------------------------
 # ID Management
 # -------------------------------------------------------
-
-def get_next_item_number(dict):
-    num_set = set()
-    import_into_set(dict, num_set)
-    max_num = 1
-    while max_num in num_set:
-        max_num += 1
-    return max_num
 
 def import_into_set(dict, set):
     for item_num, product in dict.items():
@@ -123,10 +102,6 @@ def run_updates():
 # -------------------------------------------------------
 # CLI helpers (used by main.py only)
 # -------------------------------------------------------
-
-def print_all_in_csv(dict):
-    for item_num, product in dict.items():
-        print(f"Item {product.id}; Name: {product.name}; Current Price: {product.current_price}; Previous Price: {product.last_price}")
 
 def print_item_name(dict):
     for item_num, product in dict.items():
