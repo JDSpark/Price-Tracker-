@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from functions import (load_csv_to_dict, save_dict_to_csv, set_product_info,
-                       get_next_item_number, check_item_in_dict, run_updates)
+                       get_next_item_number, check_item_in_dict, run_updates, fix_url)
 from scraper import get_website
 from scheduler import start_scheduler
 from dotenv import load_dotenv 
@@ -25,6 +25,7 @@ def home_page():
 @app.route("/add", methods=["POST"])
 def add_product():
     url = request.form.get("url", "").strip()
+    url = fix_url(url)
     if not url:
         flash("Please enter a URL.", "error")
         return redirect(url_for("home_page"))

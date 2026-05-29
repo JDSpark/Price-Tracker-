@@ -1,11 +1,11 @@
 import csv
 import time
 from product import Product
-from scraper import get_name_from_url, get_price_from_url
+from scraper import get_product_info_amazon
 from alerts import send_price_alert
 
 # -------------------------------------------------------
-# Price Updates
+# URL Cleaner
 # -------------------------------------------------------
 
 def fix_url(url):
@@ -22,10 +22,7 @@ def fix_url(url):
     elif slash == -1:
         end = question_mark
     elif question_mark != -1 and slash != -1:
-        if question_mark < slash:
-            end = question_mark
-        else:
-            end = slash
+        end = min(question_mark, slash)
     dp = url[start:end]
     if len(dp) != 10:
         return None
@@ -83,9 +80,8 @@ def import_into_set(dict, set):
 # -------------------------------------------------------
 
 def set_product_info(url, dict):
-    name = get_name_from_url(url)
+    name, current_price = get_product_info_amazon(url)
     id = get_next_item_number(dict)
-    current_price = get_price_from_url(url)
     product = Product(id, url, name, current_price)
     return product
 
@@ -103,7 +99,7 @@ def check_for_price_updates(dict):
     changes = []
     for item_num, product in dict.items():
         old_price = product.current_price
-        new_price = get_price_from_url(product.url)
+        _, new_price = get_product_info_amazon(product.url)
         time.sleep(2)
         changed = product.apply_new_price(new_price)
         if changed:
