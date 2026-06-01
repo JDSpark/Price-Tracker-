@@ -8,7 +8,7 @@ from product import Product
 MEMBERS = {"1","2","3","4"}
 url_dict = {}
 product_by_id = load_csv_to_dict()
-run_updates(product_by_id)
+run_updates()
 c = get_next_item_number(product_by_id)
 #all items inside CSV has been loaded into product_by_id dict
 
@@ -25,7 +25,7 @@ while choice.strip() not in MEMBERS:
 
 #View All Items inside CSV - COMPLETED
 if choice.strip() == "1":
-        run_updates(product_by_id)
+        run_updates()
         print_all_in_csv(product_by_id)
 
 #View a Specific Item - COMPLETED

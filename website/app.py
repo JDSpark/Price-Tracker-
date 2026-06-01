@@ -27,7 +27,7 @@ def add_product():
     url = request.form.get("url", "").strip()
     url = fix_url(url)
     if not url:
-        flash("Please enter a URL.", "error")
+        flash("The URL You Entered is invalid.", "error")
         return redirect(url_for("home_page"))
 
     site = get_website(url)

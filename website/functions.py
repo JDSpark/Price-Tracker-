@@ -1,3 +1,4 @@
+from itertools import product
 import sqlite3
 import time
 from product import Product
@@ -112,12 +113,18 @@ def check_for_price_updates(dict):
     return changes
 
 def run_updates():
-    dict = load_csv_to_dict()
-    changes = check_for_price_updates(dict)
-    save_dict_to_csv(dict)
-    for change in changes:
-        send_price_alert(change["name"], change["old_price"], change["new_price"], change["url"])
-    return changes
+    product_dict = load_db_to_dict()
+    for item_num, item in product_dict.items():
+        _, new_price = get_product_info_amazon(item.url)
+        if new_price != item.current_price:
+            item.apply_new_price(new_price) 
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("UPDATE products SET current_price = ?, last_price = ? WHERE id = ?", (item.current_price, item.last_price, item.id))
+            conn.commit()
+            conn.close()
+            send_price_alert(item.name, item.last_price, item.current_price, item.url)
+
 
 # -------------------------------------------------------
 # CLI helpers (used by main.py only)
