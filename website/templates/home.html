@@ -23,7 +23,6 @@
   <table class="table">
     <thead>
       <tr>
-        <th>#</th>
         <th>Product</th>
         <th>Current Price</th>
         <th>Last Price</th>
@@ -34,7 +33,6 @@
     <tbody>
       {% for id, p in products.items() %}
       <tr>
-        <td>{{ id }}</td>
         <td><a href="{{ p.url }}" target="_blank">{{ p.name }}</a></td>
         <td>{{ p.current_price }}</td>
         <td>{{ p.last_price }}</td>

@@ -1,10 +1,9 @@
-from itertools import product
-import sqlite3
+import threading
 import time
 from product import Product
-from scraper import get_name_from_url, get_price_from_url, get_product_info_amazon
+from scraper import get_name_from_path, get_product_info_amazon
 from alerts import send_price_alert
-from website.db import get_connection
+from db import get_connection
 
 # -------------------------------------------------------
 # URL Cleaner
@@ -48,13 +47,14 @@ def load_db_to_dict():
     return product_dict
 
 def add_product(url):
-    name, price = get_product_info_amazon(url)
+    name = get_name_from_path(url)
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO products (name, current_price, last_price, url) VALUES (?,?,?,?) ", (name, price, price, url))
+    cur.execute("INSERT INTO products (name, current_price, last_price, url) VALUES (?,?,?,?) ", (name, "Fetching...", "Fetching...", url))
     conn.commit()
     new_id = cur.lastrowid
-    product = Product(new_id, url, name, price, price)
+    threading.Thread(target=scrape_and_update, args=(new_id, url)).start()
+    product = Product(new_id, url, name, "Fetching...", "Fetching...")
     conn.close()
     return product
 
@@ -74,43 +74,31 @@ def url_already_tracked(url):
     return check is not None
     
 # -------------------------------------------------------
-# ID Management
+# Helper Functions
 # -------------------------------------------------------
 
 def import_into_set(dict, set):
     for item_num, product in dict.items():
         set.add(product.id)
 
-# -------------------------------------------------------
-# Product Info
-# -------------------------------------------------------
-
-def check_item_in_dict(item_to_check, dict):
-    for item_num, product in dict.items():
-        if item_to_check == product.url:
-            return True
-    return False
+def scrape_and_update(product_id, url):
+    for attempt in range(10):
+        name, price = get_product_info_amazon(url)
+        if price == "N/A":
+            time.sleep(15)
+        else:
+            break
+    if price == "N/A":
+        price = "FAILED"
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE products SET name = ?, current_price = ?, last_price = ? WHERE id = ?", (name, price, price, product_id,))
+    conn.commit()
+    conn.close()
 
 # -------------------------------------------------------
 # Price Updates
 # -------------------------------------------------------
-
-def check_for_price_updates(dict):
-    changes = []
-    for item_num, product in dict.items():
-        old_price = product.current_price
-        _, new_price = get_product_info_amazon(product.url)
-        time.sleep(2)
-        changed = product.apply_new_price(new_price)
-        if changed:
-            changes.append({
-                "name": product.name,
-                "old_price": old_price,
-                "new_price": product.current_price,
-                "url" : product.url
-            })
-            print(f"{product.name}: {product.last_price} → {product.current_price}")
-    return changes
 
 def run_updates():
     product_dict = load_db_to_dict()

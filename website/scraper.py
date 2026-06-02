@@ -86,11 +86,16 @@ def fetch_page(url):
 def get_product_info_amazon(url):
     soup = fetch_page(url)
     if not soup:
-        return None
-    price = soup.select_one('#corePrice_feature_div span.a-offscreen')
+        return None, None
+
     title = soup.find("span", {"id": "productTitle"})
     name = title.get_text(strip=True) if title else get_name_from_path(url)
-    price_text = price.get_text().strip() if price else None
+    price = (
+        soup.select_one('#corePrice_feature_div span.a-offscreen') or
+        soup.select_one('span.a-price span.a-offscreen') or
+        soup.select_one('span.a-price-whole')
+    )
+    price_text = price.get_text().strip() if price else "N/A"
     return name, price_text 
 
 # -------------------------------------------------------

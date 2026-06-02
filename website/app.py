@@ -1,29 +1,29 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
-from functions import (load_csv_to_dict, save_dict_to_csv, set_product_info,
-                       get_next_item_number, check_item_in_dict, run_updates, fix_url)
+from functions import (load_db_to_dict, run_updates, fix_url, add_product, delete_product, url_already_tracked)
 from scraper import get_website
 from scheduler import start_scheduler
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
+from db import init_db 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+init_db()
 
 SUPPORTED_SITES = {"Amazon"}  # Add "Best Buy", "Macy's" here when ready
 
 def get_products():
-    return load_csv_to_dict()
+    return load_db_to_dict()
 
 @app.route("/")
 def home_page():
-    run_updates()
     products = get_products()
     products = dict(sorted(products.items(), key=lambda x: int(x[0])))
     return render_template("home.html", products=products)
 
 @app.route("/add", methods=["POST"])
-def add_product():
+def add_product_flask():
     url = request.form.get("url", "").strip()
     url = fix_url(url)
     if not url:
@@ -35,24 +35,18 @@ def add_product():
         flash(f"{site} is not yet supported. Only Amazon is supported right now.", "error")
         return redirect(url_for("home_page"))
 
-    products = get_products()
-    if check_item_in_dict(url, products):
+    if url_already_tracked(url):
         flash("That product is already being tracked.", "info")
         return redirect(url_for("home_page"))
 
-    new_id = get_next_item_number(products)
-    products[new_id] = set_product_info(url, products)
-    save_dict_to_csv(products)
+    add_product(url)
     flash("Product added successfully!", "success")
     return redirect(url_for("home_page"))
 
 @app.route("/delete/<int:item_id>", methods=["POST"])
-def delete_product(item_id):
-    products = get_products()
-    if item_id in products:
-        del products[item_id]
-        save_dict_to_csv(products)
-        flash("Product removed.", "info")
+def delete_product_flask(item_id):
+    delete_product(item_id)
+    flash("Product removed.", "info")
     return redirect(url_for("home_page"))
 
 start_scheduler()
