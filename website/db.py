@@ -10,7 +10,7 @@ def get_connection():
 def init_db():
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(""" 
+    cur.execute("""
     CREATE TABLE IF NOT EXISTS products 
     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
     name TEXT NOT NULL, 
@@ -18,6 +18,15 @@ def init_db():
     last_price TEXT NOT NULL, 
     url TEXT NOT NULL )
     """)
+    
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS history
+    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    price REAL NOT NULL,
+    date TEXT NOT NULL)
+    """)
+
     conn.commit()
     conn.close()
 

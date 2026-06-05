@@ -1,5 +1,6 @@
 import threading
 import time
+from datetime import datetime
 from product import Product
 from scraper import get_name_from_path, get_product_info_amazon
 from alerts import send_price_alert
@@ -93,6 +94,8 @@ def scrape_and_update(product_id, url):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("UPDATE products SET name = ?, current_price = ?, last_price = ? WHERE id = ?", (name, price, price, product_id,))
+    if price != "FAILED":
+        record_price_history(product_id, price)
     conn.commit()
     conn.close()
 
@@ -104,11 +107,14 @@ def run_updates():
     product_dict = load_db_to_dict()
     for item_num, item in product_dict.items():
         _, new_price = get_product_info_amazon(item.url)
+        if new_price == "N/A":
+            continue
         if new_price != item.current_price:
             item.apply_new_price(new_price) 
             conn = get_connection()
             cur = conn.cursor()
             cur.execute("UPDATE products SET current_price = ?, last_price = ? WHERE id = ?", (item.current_price, item.last_price, item.id))
+            record_price_history(item.id, item.current_price)
             conn.commit()
             conn.close()
             send_price_alert(item.name, item.last_price, item.current_price, item.url)
@@ -125,3 +131,25 @@ def print_item_name(dict):
 def print_product_info(dict, item_num):
     product = dict[item_num]
     print(f"Name: {product.name}; Price: {product.current_price}")
+
+# -------------------------------------------------------
+# Price History
+# -------------------------------------------------------
+
+def record_price_history(product_id, price):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO history (product_id, price, date) VALUES (?, ?, ?)", (product_id, price, datetime.now()))
+    conn.commit()
+    conn.close()
+
+def get_price_history(product_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT date, price FROM history WHERE product_id = ? ", (product_id,))
+    product_history = cur.fetchall()
+    history_list = []
+    for row in product_history:
+        history_list.append({"date" : row[0], "price" : row[1]})
+    conn.close()
+    return history_list

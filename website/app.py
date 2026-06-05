@@ -1,6 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
-from functions import (load_db_to_dict, run_updates, fix_url, add_product, delete_product, url_already_tracked)
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from functions import (get_price_history, load_db_to_dict, run_updates, fix_url, add_product, delete_product, url_already_tracked)
 from scraper import get_website
 from scheduler import start_scheduler
 from dotenv import load_dotenv
@@ -48,6 +48,17 @@ def delete_product_flask(item_id):
     delete_product(item_id)
     flash("Product removed.", "info")
     return redirect(url_for("home_page"))
+
+@app.route("/history/<int:product_id>")
+def get_history_flask(product_id):
+    product_history_list = get_price_history(product_id)
+    return jsonify(product_history_list)
+
+@app.route("/product/<int:product_id>")
+def product_page(product_id):
+    db_list = get_products()
+    product = db_list[product_id]
+    return render_template("product.html", product = product)
 
 start_scheduler()
 if __name__ == "__main__":

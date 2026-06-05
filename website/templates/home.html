@@ -33,7 +33,7 @@
     <tbody>
       {% for id, p in products.items() %}
       <tr>
-        <td><a href="{{ p.url }}" target="_blank">{{ p.name }}</a></td>
+        <td><a href="{{url_for('product_page', product_id=p.id)}}" >{{ p.name }}</a></td>
         <td>{{ p.current_price }}</td>
         <td>{{ p.last_price }}</td>
         <td>
