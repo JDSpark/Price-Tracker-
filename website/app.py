@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from functions import (get_price_history, load_db_to_dict, run_updates, fix_url, add_product, delete_product, url_already_tracked)
+from functions import (get_price_history, load_db_to_dict, fix_url, add_product, delete_product, url_already_tracked)
 from scraper import get_website
 from scheduler import start_scheduler
 from dotenv import load_dotenv

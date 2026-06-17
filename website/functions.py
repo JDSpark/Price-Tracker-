@@ -94,11 +94,10 @@ def scrape_and_update(product_id, url):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("UPDATE products SET name = ?, current_price = ?, last_price = ? WHERE id = ?", (name, price, price, product_id,))
-    if price != "FAILED":
-        record_price_history(product_id, price)
     conn.commit()
     conn.close()
-
+    if price != "FAILED":
+        record_price_history(product_id, price)
 # -------------------------------------------------------
 # Price Updates
 # -------------------------------------------------------
@@ -114,9 +113,9 @@ def run_updates():
             conn = get_connection()
             cur = conn.cursor()
             cur.execute("UPDATE products SET current_price = ?, last_price = ? WHERE id = ?", (item.current_price, item.last_price, item.id))
-            record_price_history(item.id, item.current_price)
             conn.commit()
             conn.close()
+            record_price_history(item.id, item.current_price)
             send_price_alert(item.name, item.last_price, item.current_price, item.url)
 
 
@@ -137,9 +136,11 @@ def print_product_info(dict, item_num):
 # -------------------------------------------------------
 
 def record_price_history(product_id, price):
+    new_price = price.replace("$", "").replace(",", "")
+    new_price = float(new_price)
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO history (product_id, price, date) VALUES (?, ?, ?)", (product_id, price, datetime.now()))
+    cur.execute("INSERT INTO history (product_id, price, date) VALUES (?, ?, ?)", (product_id, new_price, datetime.now()))
     conn.commit()
     conn.close()
 

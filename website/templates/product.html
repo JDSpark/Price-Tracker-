@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="card" style="margin-bottom: 20px;">
+  <div class="card-header">
+    <h2 class="card-title">{{ product.name }}</h2>
+  </div>
+
+  <div class="row row-wrap" style="gap: 20px; margin-bottom: 16px;">
+    <div>
+      <p style="margin:0; color: var(--muted);">Current Price</p>
+      <p style="margin:0; font-size: 20px;">{{ product.current_price }}</p>
+    </div>
+    <div>
+      <p style="margin:0; color: var(--muted);">Last Price</p>
+      <p style="margin:0; font-size: 20px;">{{ product.last_price }}</p>
+    </div>
+  </div>
+
+  <a href="{{ product.url }}" target="_blank" class="btn btn-primary">View on Amazon</a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Price History</h2>
+  </div>
+  <canvas id="priceChart" height="100"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  fetch("{{ url_for('get_history_flask', product_id=product.id) }}")
+    .then(response => response.json())
+    .then(data => {
+      const labels = data.map(row => row.date);
+      const prices = data.map(row => row.price);
+
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Price ($)',
+            data: prices,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.15)',
+            fill: true,
+            tension: 0.2,
+            hoverRadius: 100,
+            pointRadius: 6,
+            pointHoverRadius: 10,
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: false }
+          }
+        }
+      });
+    });
+</script>
+
+{% endblock %}
