@@ -1,18 +1,17 @@
-import sqlite3
+import psycopg2
 import os 
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, "products.db")
+from dotenv import load_dotenv
+load_dotenv()
 
 def get_connection():
-    return sqlite3.connect(DATABASE)
+    return psycopg2.connect(os.getenv("DATABASE_URL"))
 
 def init_db():
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
     CREATE TABLE IF NOT EXISTS products 
-    (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    (id SERIAL PRIMARY KEY, 
     name TEXT NOT NULL, 
     current_price TEXT NOT NULL, 
     last_price TEXT NOT NULL, 
@@ -21,7 +20,7 @@ def init_db():
     
     cur.execute("""
     CREATE TABLE IF NOT EXISTS history
-    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    (id SERIAL PRIMARY KEY,
     product_id INTEGER NOT NULL,
     price REAL NOT NULL,
     date TEXT NOT NULL)

@@ -51,9 +51,9 @@ def add_product(url):
     name = get_name_from_path(url)
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO products (name, current_price, last_price, url) VALUES (?,?,?,?) ", (name, "Fetching...", "Fetching...", url))
+    cur.execute("INSERT INTO products (name, current_price, last_price, url) VALUES (%s,%s,%s,%s) RETURNING id", (name, "Fetching...", "Fetching...", url))
+    new_id = cur.fetchone()[0]
     conn.commit()
-    new_id = cur.lastrowid
     threading.Thread(target=scrape_and_update, args=(new_id, url)).start()
     product = Product(new_id, url, name, "Fetching...", "Fetching...")
     conn.close()
@@ -62,14 +62,14 @@ def add_product(url):
 def delete_product(product_id):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("DELETE FROM products WHERE id = ?", (product_id,))
+    cur.execute("DELETE FROM products WHERE id = %s", (product_id,))
     conn.commit()
     conn.close()
 
 def url_already_tracked(url):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id FROM products WHERE url = ?", (url,))
+    cur.execute("SELECT id FROM products WHERE url = %s", (url,))
     check = cur.fetchone()
     conn.close()
     return check is not None
@@ -93,7 +93,7 @@ def scrape_and_update(product_id, url):
         price = "FAILED"
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("UPDATE products SET name = ?, current_price = ?, last_price = ? WHERE id = ?", (name, price, price, product_id,))
+    cur.execute("UPDATE products SET name = %s, current_price = %s, last_price = %s WHERE id = %s", (name, price, price, product_id,))
     conn.commit()
     conn.close()
     if price != "FAILED":
@@ -112,7 +112,7 @@ def run_updates():
             item.apply_new_price(new_price) 
             conn = get_connection()
             cur = conn.cursor()
-            cur.execute("UPDATE products SET current_price = ?, last_price = ? WHERE id = ?", (item.current_price, item.last_price, item.id))
+            cur.execute("UPDATE products SET current_price = %s, last_price = %s WHERE id = %s", (item.current_price, item.last_price, item.id))
             conn.commit()
             conn.close()
             record_price_history(item.id, item.current_price)
@@ -140,14 +140,14 @@ def record_price_history(product_id, price):
     new_price = float(new_price)
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO history (product_id, price, date) VALUES (?, ?, ?)", (product_id, new_price, datetime.now()))
+    cur.execute("INSERT INTO history (product_id, price, date) VALUES (%s, %s, %s)", (product_id, new_price, datetime.now()))
     conn.commit()
     conn.close()
 
 def get_price_history(product_id):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT date, price FROM history WHERE product_id = ? ", (product_id,))
+    cur.execute("SELECT date, price FROM history WHERE product_id = %s ", (product_id,))
     product_history = cur.fetchall()
     history_list = []
     for row in product_history:
