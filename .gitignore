@@ -15,4 +15,4 @@ bin/
 lib/
 include/
 pyvenv.cfg
-.vscode
+.vscode/
