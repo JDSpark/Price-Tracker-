@@ -69,7 +69,7 @@ def get_name_from_url(url):
 
 def fetch_page(url):
     try:
-        response = requests.get(f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={url}", headers=HEADERS, timeout=60)
+        response = requests.get(f"https://api.scrapingant.com/v2/general?url={url}&x-api-key={SCRAPER_API_KEY}&proxy_country=US", timeout=60)
         response.raise_for_status()
         return BeautifulSoup(response.content, "html.parser")
     except requests.exceptions.RequestException as e:
